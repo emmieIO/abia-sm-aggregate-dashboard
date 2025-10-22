@@ -74,7 +74,6 @@ To install and set up the ABIA State Aggregator Dashboard, the DevOps team shoul
     - Set up log rotation and monitoring for application health.
     - Regularly update dependencies and apply security patches.
 
-Refer to your organization's deployment pipeline for CI/CD integration and environment-specific configurations.
 
 
 
