@@ -1,0 +1,8 @@
+.login-bg{
+    background:url('../images/auth-bg.jpg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-color: teal;
+    background-blend-mode:multiply;
+}
