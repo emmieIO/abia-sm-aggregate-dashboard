@@ -14,7 +14,7 @@ class DashboardAdministratorSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
+        User::updateOrCreate(['email' => 'default@mail.com'],[
             'name' => 'Admin User',
             'username' => 'admin-'.str()->random(5),
             'email' => 'default@mail.com',
