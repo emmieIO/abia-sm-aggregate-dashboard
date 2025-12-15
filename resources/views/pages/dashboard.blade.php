@@ -32,7 +32,7 @@
                         class="py-2 px-3 pe-9 block w-full rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none border-black">
                         <option selected="">Fileter by subject</option>
                         @foreach ($subjects as $subject)
-                            <option data-route="{{ route('students.top-by-subject', ['subject' => $subject->id]) }}"
+                            <option data-route="{{ URL::secure('students.top-by-subject', ['subject' => $subject->id]) }}"
                                 value="{{ $subject->id }}">{{ Str::ucfirst($subject->name) }}</option>
                         @endforeach
                     </select>
@@ -47,7 +47,7 @@
                         class="py-2 px-3 pe-9 block w-full rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none border-black">
                         <option selected="">Fileter by subject</option>
                         @foreach ($subjects as $subject)
-                            <option data-route="{{ route('students.low-by-subject', ['subject' => $subject->id]) }}"
+                            <option data-route="{{ URL::secure('students.low-by-subject', ['subject' => $subject->id]) }}"
                                 value="{{ $subject->id }}">{{ Str::ucfirst($subject->name) }}</option>
                         @endforeach
                     </select>
