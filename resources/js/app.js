@@ -7,6 +7,8 @@ import Alpine from 'alpinejs'
 
 
 createIcons({ icons });
+window.createIcons = createIcons;
+window.lucide = { icons };
 
 window.alpine = Alpine;
 

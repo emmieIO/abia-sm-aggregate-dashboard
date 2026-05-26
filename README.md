@@ -1,79 +1,194 @@
+## Abia Smart School Aggregate Dashboard
 
+The Abia Smart School Aggregate Dashboard is a Laravel application for viewing statewide and per-school analytics from the Smart School SMS database. It shows enrollment, schools, students, parents, staff, alumni, discipline records, academic records, and intervention watchlists where assessment data exists.
 
-## ABIA STATE AGGREGATOR DASHBOARD
+## Requirements
 
-The **ABIA State Smart School Aggregator Dashboard** is a web application that delivers comprehensive data visualization and reporting for key metrics across Abia State. Powered by Laravel, it consolidates information from diverse sources, allowing users to monitor trends, evaluate performance, and make informed decisions. With an intuitive interface and interactive charts, the dashboard empowers stakeholders to gain actionable insights into state-wide activities and outcomes.
+- PHP 8.2 or newer
+- Composer 2
+- MySQL or MariaDB
+- Node.js 20 or newer
+- npm
+- Apache, Nginx, or another PHP-capable web server
 
-## System Requirements
-To run the ABIA State Aggregator Dashboard, ensure your system meets the following requirements:
+The app uses two database connections:
 
-- **PHP** >= 8.1
-- **Composer** (dependency manager for PHP)
-- **Laravel** >= 10.x
-- **Database**: MySQL, PostgreSQL, or SQLite
-- **Node.js** >= 16.x and **npm** (for frontend asset compilation)
-- **Web Server**: Apache, Nginx, or Laravel's built-in server
+- `mysql`: the dashboard application's own database for users, sessions, cache, jobs, and auth.
+- `abia_sms`: the source Smart School SMS database used for schools, students, parents, staff, scores, penalties, and analytics.
 
-For detailed setup instructions, refer to the [Laravel documentation](https://laravel.com/docs).
+## Fresh Deployment
 
-##  Installation Guide
+1. Clone the project.
 
+```bash
+git clone <repository-url>
+cd abia-sm-aggregate-dashboard
+```
 
-To install and set up the ABIA State Aggregator Dashboard, the DevOps team should follow these steps:
+2. Install PHP dependencies.
 
-1. **Clone the Repository**
-    ```bash
-    git clone https://github.com/your-username/abia-aggregate-dashboard.git
-    cd abia-aggregate-dashboard
-    ```
+```bash
+composer install --no-dev --optimize-autoloader
+```
 
-2. **Install PHP Dependencies**
-    ```bash
-    composer install
-    ```
+3. Create the environment file.
 
-3. **Set Up Environment Configuration**
-    ```bash
-    cp .env.example .env
-    ```
-    Update the `.env` file with database credentials, mail settings, and other environment variables as required for your infrastructure.
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-4. **Generate Application Key**
-    ```bash
-    php artisan key:generate
-    ```
+4. Configure `.env`.
 
-5. **Run Database Migrations and Database Seed**
-    ```bash
-    php artisan migrate --seed
-    ```
+Set the dashboard app URL and production flags:
 
-6. **Install Node.js Dependencies and Build Frontend Assets**
-    ```bash
-    npm install
-    npm run build
-    ```
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://your-domain.example
+```
 
-7. **Configure Web Server**
-    - For **Apache** or **Nginx**, point the document root to the `public` directory.
-    - Ensure proper permissions for storage and bootstrap/cache directories:
-      ```bash
-      chmod -R 775 storage bootstrap/cache
-      chown -R www-data:www-data storage bootstrap/cache
-      ```
+Set the dashboard app database:
 
-8. **Start the Application**
-    - For development:
-      ```bash
-      php artisan serve
-      ```
-      Access the dashboard at `http://localhost:8000`.
-    - For production, use your web server to serve the application and configure SSL as needed.
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=dashboard_db
+DB_USERNAME=dashboard_user
+DB_PASSWORD=secure-password
+```
 
-9. **Monitor and Maintain**
-    - Set up log rotation and monitoring for application health.
-    - Regularly update dependencies and apply security patches.
+Set the SMS source database:
 
+```env
+DB_CONNECTION_ABIA_SMS=mysql
+DB_HOST_ABIA_SMS=127.0.0.1
+DB_PORT_ABIA_SMS=3306
+DB_DATABASE_ABIA_SMS=sms_database
+DB_USERNAME_ABIA_SMS=sms_user
+DB_PASSWORD_ABIA_SMS=secure-password
+```
 
+Recommended production drivers:
 
+```env
+CACHE_STORE=database
+SESSION_DRIVER=database
+QUEUE_CONNECTION=database
+```
 
+5. Run migrations and seed the dashboard admin user.
+
+```bash
+php artisan migrate --force
+php artisan db:seed --force
+```
+
+6. Install and build frontend assets.
+
+```bash
+npm ci
+npm run build
+```
+
+7. Optimize Laravel for production.
+
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+8. Configure the web server.
+
+Point the web server document root to:
+
+```text
+<project-path>/public
+```
+
+Make sure PHP-FPM or the web server user can write to:
+
+```bash
+storage
+bootstrap/cache
+```
+
+Typical Linux permissions:
+
+```bash
+chown -R www-data:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+```
+
+9. Start the queue worker if queues are enabled.
+
+```bash
+php artisan queue:work --tries=3
+```
+
+Use Supervisor, systemd, or your hosting control panel to keep the worker running.
+
+## Updating an Existing Deployment
+
+Run these commands from the project directory after pulling new code:
+
+```bash
+composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+php artisan migrate --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan cache:clear
+```
+
+Restart PHP-FPM and queue workers if your hosting environment requires it.
+
+## Local Development
+
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+npm run dev
+php artisan serve
+```
+
+Open:
+
+```text
+http://127.0.0.1:8000
+```
+
+## Verification Checklist
+
+After deployment, confirm:
+
+- Login page loads.
+- A dashboard user can sign in.
+- `/schools`, `/students`, `/parents`, `/alumni`, and `/penalties` pages load.
+- The dashboard can read the `abia_sms` database.
+- `public/build/manifest.json` exists after `npm run build`.
+- `storage/logs/laravel.log` has no fresh deployment errors.
+
+Useful checks:
+
+```bash
+php artisan about
+php artisan route:list --except-vendor
+php artisan test --compact
+```
+
+## Data Notes
+
+Academic analytics and the Intervention Watchlist depend on rows in:
+
+- `exam_records`
+- `exam_records_summary`
+
+If those tables are empty for a school, the dashboard will still load, but academic performance and intervention sections will show empty states until assessment data is available.

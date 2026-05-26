@@ -8,14 +8,19 @@ use Illuminate\Http\Request;
 
 class SchoolController extends Controller
 {
-    public function __construct(public SchoolService $schoolService)
-    {}
+    public function __construct(public SchoolService $schoolService) {}
 
-
-    public function index()
+    public function index(Request $request)
     {
-        $schools = $this->schoolService->fetchSchools(20, request('search'));
-        // dd($schools);
-        return view('pages.schools.index', compact('schools'));
+        $search = $request->input('search');
+        $filters = [
+            'lga' => $request->input('lga'),
+            'status' => $request->input('status'),
+        ];
+
+        $schools = $this->schoolService->fetchSchools(20, $search, $filters);
+        $lgas = $this->schoolService->fetchLgas();
+
+        return view('pages.schools.index', compact('schools', 'lgas'));
     }
 }

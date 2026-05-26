@@ -1,26 +1,45 @@
 <x-app-layout>
     <x-slot name="title">Students Records</x-slot>
     <x-slot name="search">
-        <div class="hidden md:block">
-            <!-- Search Input -->
-            <div class="relative">
-                <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none z-20 ps-3.5">
-                    <i data-lucide="search" class="shrink-0 size-4 text-gray-400 dark:text-white/60"></i>
-                </div>
-                <form action="{{ route('students.index') }}" method="get">
-                    <input value="{{ request('search') }}" onblur="this.form.submit()" type="text" id="student-search" name="search"
-                        title="Search by student ID, first name, or email"
-                        class="py-2 ps-10 pe-16 block w-full bg-white border-gray-200 rounded-lg text-sm focus:outline-hidden focus:border-blue-500 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder:text-neutral-400 dark:focus:ring-neutral-600"
+        <div class="hidden md:flex items-center gap-3">
+            <form action="{{ route('students.index') }}" method="get" class="flex items-center gap-2">
+                <!-- School Filter -->
+                <select name="school_id" onchange="this.form.submit()" class="py-2 px-3 pe-9 block bg-white border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400">
+                    <option value="">All Schools</option>
+                    @foreach($schools as $school)
+                        <option value="{{ $school->id }}" {{ request('school_id') == $school->id ? 'selected' : '' }}>{{ $school->name }}</option>
+                    @endforeach
+                </select>
+
+                <!-- Class Filter -->
+                <select name="class_id" onchange="this.form.submit()" class="py-2 px-3 pe-9 block bg-white border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400">
+                    <option value="">All Classes</option>
+                    @foreach($classes as $class)
+                        <option value="{{ $class->id }}" {{ request('class_id') == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
+                    @endforeach
+                </select>
+
+                <!-- Gender Filter -->
+                <select name="sex" onchange="this.form.submit()" class="py-2 px-3 pe-9 block bg-white border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400">
+                    <option value="">All Gender</option>
+                    <option value="Male" {{ request('sex') == 'Male' ? 'selected' : '' }}>Male</option>
+                    <option value="Female" {{ request('sex') == 'Female' ? 'selected' : '' }}>Female</option>
+                </select>
+
+                <!-- Search Input -->
+                <div class="relative min-w-64">
+                    <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none z-20 ps-3.5">
+                        <i data-lucide="search" class="shrink-0 size-4 text-gray-400 dark:text-white/60"></i>
+                    </div>
+                    <input value="{{ request('search') }}" onblur="this.form.submit()" type="text" name="search"
+                        class="py-2 ps-10 pe-16 block w-full bg-white border-gray-200 rounded-lg text-sm focus:outline-hidden focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 placeholder:text-neutral-400"
                         placeholder="Lookup Students">
-                    </form>
-            </div>
-            <!-- End Search Input -->
+                </div>
+            </form>
+            <a href="{{ route('students.index') }}" class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <i data-lucide="refresh-ccw" class="size-4"></i>
+            </a>
         </div>
-        <a href="{{ route('students.index') }}"
-            class="hidden  py-2 px-4 md:inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
-            <i data-lucide="refresh-ccw" class="size-5"></i>
-            Reset
-        </a>
     </x-slot>
     <!-- Table Section -->
     <div class="">
@@ -144,8 +163,7 @@
                             </thead>
 
                             <tbody class="divide-y divide-gray-200 dark:divide-neutral-700  text-color">
-                                @if ($students->count())
-                                    @foreach ($students as $index => $student)
+                                @forelse ($students as $index => $student)
                                         <tr>
                                             <td class="h-px w-auto whitespace-nowrap">
                                                 <div class="px-6 py-2 flex items-center gap-x-3">
@@ -156,13 +174,13 @@
                                             <td class="h-px w-auto whitespace-nowrap">
                                                 <div class="px-6 py-2 flex items-center gap-x-3">
                                                     <span
-                                                        class="text-sm text-black dark:text-white decoration-2">{!! $student->student_id !!}</span>
+                                                        class="text-sm text-black dark:text-white decoration-2">{{ $student->student_id }}</span>
                                                 </div>
                                             </td>
                                             <td class="h-px w-auto whitespace-nowrap">
                                                 <div class="px-6 py-2 flex items-center gap-x-3">
                                                     <span
-                                                        class="text-sm text-black dark:text-white decoration-2">{!! $student->fname !!}</span>
+                                                        class="text-sm text-black dark:text-white decoration-2">{{ $student->fname }}</span>
                                                 </div>
                                             </td>
                                             <td class="h-px w-auto whitespace-nowrap">
@@ -187,7 +205,7 @@
                                             <td class="h-px w-auto whitespace-nowrap">
                                                 <div class="px-6 py-2">
                                                     <span
-                                                        class="text-sm text-gray-800 dark:text-neutral-200">{!! $student->class !!}</span>
+                                                        class="text-sm text-gray-800 dark:text-neutral-200">{{ $student->class }}</span>
                                                 </div>
                                             </td>
                                             <td class="h-px w-auto whitespace-nowrap">
@@ -234,8 +252,13 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                    @endforeach
-                                @endif
+                                @empty
+                                    <tr>
+                                        <td colspan="14" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-neutral-400">
+                                            No student records match the current filters.
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                         <!-- End Table -->

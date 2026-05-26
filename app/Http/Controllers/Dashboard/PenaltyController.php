@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\StudentService;
 use Illuminate\Http\Request;
 
-class StudentController extends Controller
+class PenaltyController extends Controller
 {
     public function __construct(public StudentService $studentService) {}
 
@@ -15,14 +15,11 @@ class StudentController extends Controller
         $search = $request->input('search');
         $filters = [
             'school_id' => $request->input('school_id'),
-            'class_id' => $request->input('class_id'),
-            'sex' => $request->input('sex'),
         ];
 
-        $students = $this->studentService->fetchStudents(20, $search, $filters);
+        $penalties = $this->studentService->fetchPenalties(30, $search, $filters);
         $schools = $this->studentService->fetchSchools();
-        $classes = $this->studentService->fetchClasses($filters['school_id']);
 
-        return view('pages.students', compact('students', 'schools', 'classes'));
+        return view('pages.penalties', compact('penalties', 'schools'));
     }
 }
