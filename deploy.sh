@@ -21,5 +21,15 @@ php artisan db:seed --force
 php artisan optimize
 php artisan view:cache
 php artisan event:cache
+php artisan storage:link --force
 
-    echo "✅ Deployment complete!"
+# 5. Grant appropriate permissions
+echo "🔐 Setting permissions..."
+chmod -R 775 storage bootstrap/cache
+
+# Ensure log file exists and is writable
+touch storage/logs/laravel.log
+chmod 664 storage/logs/laravel.log
+
+echo "✅ Deployment complete!"
+
