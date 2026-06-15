@@ -15,12 +15,14 @@ class AuthenticationService
         //
     }
 
-    public function authenticateUser(string $username, string $password)
+    public function authenticateUser(string $login, string $password)
     {
         // Implementation for user authentication
         try {
+            $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
             if(Auth::attempt([
-                'username' => $username,
+                $field => $login,
                 'password' => $password
             ])){
                 session()->regenerate();
@@ -39,5 +41,12 @@ class AuthenticationService
         session()->invalidate();
         session()->regenerateToken();
         return true;
+    }
+
+    public function updatePassword($user, string $newPassword)
+    {
+        return $user->update([
+            'password' => $newPassword
+        ]);
     }
 }

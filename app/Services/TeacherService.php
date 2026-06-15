@@ -24,7 +24,31 @@ class TeacherService
             ->leftJoin('status_detail', 'staffs.status', '=', 'status_detail.id')
             ->leftJoin('lgas as l', 'schools.lga', '=', 'l.id')
             ->leftJoin('designations as des', 'staffs.role', '=', 'des.id')
-            ->select('staffs.id', 'staffs.staff_id', 'staffs.address', 'staffs.village', 'states.name as state', 'staffs.fname', 'staffs.sname', 'staffs.email', 'staffs.oname', 'staffs.sex', 'staffs.dob', 'status_detail.name as status', 'schools.name as school', 'departments.name as department', 'classes.name as designate', 'l.name as lga', 'des.name as designation_name');
+            ->select(
+                'staffs.id',
+                'staffs.staff_id',
+                'staffs.address',
+                'staffs.village',
+                'staffs.phone',
+                'staffs.email',
+                'staffs.email2',
+                'staffs.sex',
+                'staffs.dob',
+                'staffs.doe',
+                'staffs.religion',
+                'staffs.abssin',
+                'staffs.employment_type',
+                'states.name as state',
+                'staffs.fname',
+                'staffs.sname',
+                'staffs.oname',
+                'status_detail.name as status',
+                'schools.name as school',
+                'departments.name as department',
+                'classes.name as designate',
+                'l.name as lga',
+                'des.name as designation_name'
+            );
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -41,10 +65,6 @@ class TeacherService
 
         if (! empty($filters['depart_id'])) {
             $query->where('staffs.depart_id', $filters['depart_id']);
-        }
-
-        if (! empty($filters['designation'])) {
-            $query->where('staffs.role', $filters['designation']);
         }
 
         if (! empty($filters['sex'])) {
@@ -64,8 +84,4 @@ class TeacherService
         return DB::connection('abia_sms')->table('departments')->select('id', 'name')->orderBy('name')->get();
     }
 
-    public function fetchDesignations()
-    {
-        return DB::connection('abia_sms')->table('designations')->select('id', 'name')->orderBy('name')->get();
-    }
 }

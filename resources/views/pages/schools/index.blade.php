@@ -33,168 +33,82 @@
             </a>
         </div>
     </x-slot>
-    <!-- Table Section -->
-    <div class="">
-        <!-- Card -->
-        <div class="flex flex-col">
-            <div class="-m-1.5 overflow-x-auto">
-                <div class="p-1.5 min-w-full inline-block align-middle">
-                    <div
-                        class="bg-white border border-gray-200 rounded-xl shadow-2xs overflow-hidden dark:bg-neutral-900 dark:border-neutral-700">
-                        <!-- Header -->
-                        <div
-                            class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200 dark:border-neutral-700">
-                            <div>
-                                <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">
-                                    Schools Records
-                                </h2>
-                            </div>
-                        </div>
-                        <!-- End Header -->
-                        <!-- Table -->
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
-                            <thead
-                                class="bg-gray-50 divide-y divide-gray-200 dark:bg-neutral-800 dark:divide-neutral-700 whitespace-nowrap">
-                                <tr>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-start border-s border-gray-200 dark:border-neutral-700">
-                                        <span
-                                            class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
-                                            S/N
-                                        </span>
-                                    </th>
-
-                                    <th scope="col"
-                                        class="px-6 py-3 text-start border-s border-gray-200 dark:border-neutral-700">
-                                        <span
-                                            class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
-                                            School Name
-                                        </span>
-                                    </th>
-
-                                    <th scope="col" class="px-6 py-3 text-start">
-                                        <span
-                                            class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
-                                            School ID
-                                        </span>
-                                    </th>
-
-                                    <th scope="col" class="px-6 py-3 text-start">
-                                        <span
-                                            class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
-                                            Phone
-                                        </span>
-                                    </th>
-
-                                    <th scope="col" class="px-6 py-3 text-start">
-                                        <span
-                                            class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
-                                            Email
-                                        </span>
-                                    </th>
-
-                                    <th scope="col" class="px-6 py-3 text-start">
-                                        <span
-                                            class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
-                                            Address
-                                        </span>
-                                    </th>
-
-                                    <th scope="col" class="px-6 py-3 text-start">
-                                        <span
-                                            class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
-                                            Local Government Area
-                                        </span>
-                                    </th>
-
-                                    <th scope="col" class="px-6 py-3 text-start">
-                                        <span
-                                            class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
-                                            Status
-                                        </span>
-                                    </th>
-                                </tr>
-                            </thead>
-
-                            <tbody class="divide-y divide-gray-200 dark:divide-neutral-700  text-color">
-                                @forelse ($schools as $index => $school)
-                                        <tr>
-                                            <td class="h-px w-auto whitespace-nowrap">
-                                                <div class="px-6 py-2 flex items-center gap-x-3">
-                                                    <span
-                                                        class="text-sm text-black dark:text-white decoration-2">{{ $schools->firstItem() + $index }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="h-px w-auto whitespace-nowrap">
-                                                <div class="px-6 py-2 flex items-center gap-x-3">
-                                                    <span
-                                                        class="text-sm text-black dark:text-white decoration-2">{{ $school->name }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="h-px w-auto whitespace-nowrap">
-                                                <div class="px-6 py-2">
-                                                    <span
-                                                        class="font-semibold text-sm text-gray-800 dark:text-neutral-200">{{ $school->school_id }}</span>
-
-                                                </div>
-                                            </td>
-                                            <td class="h-px w-auto whitespace-nowrap">
-                                                <div class="px-6 py-2">
-                                                    <span
-                                                        class="text-sm text-gray-800 dark:text-neutral-200">{{ $school->phone }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="h-px w-auto whitespace-nowrap">
-                                                <div class="px-6 py-2">
-                                                    <span
-                                                        class="text-sm text-gray-800 dark:text-neutral-200">{{ $school->email }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="h-px w-auto whitespace-nowrap">
-                                                <div class="px-6 py-2">
-                                                    <span
-                                                        class="text-sm text-gray-800 dark:text-neutral-200">{{ $school->address }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="h-px w-auto whitespace-nowrap">
-                                                <div class="px-6 py-2">
-                                                    <span
-                                                        class="text-sm text-gray-800 dark:text-neutral-200">{{ $school->lga_name }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="h-px w-auto whitespace-nowrap">
-                                                <div class="px-6 py-2">
-                                                    <span
-                                                        class="text-sm text-gray-800 dark:text-neutral-200">{{ $school->status ? 'Active' : 'Disabled' }}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="8" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-neutral-400">
-                                            No school records match the current filters.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                        <!-- End Table -->
-
-                        <!-- Footer -->
-                        <div
-                            class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
-                            <div>
-                                <div class="flex gap-x-2 space-between w-full">
-                                    {{ $schools->links('vendor.pagination.custom-pg') }}
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End Footer -->
-                    </div>
+    <div class="space-y-4">
+        <div class="rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Schools</h2>
+                    <p class="text-sm text-gray-500 dark:text-neutral-400">Open a school to choose a class and view students.</p>
                 </div>
+                <p class="text-sm font-medium text-gray-500 dark:text-neutral-400">
+                    {{ number_format($schools->total()) }} records
+                </p>
             </div>
         </div>
-        <!-- End Card -->
-    </div>
-    <!-- End Table Section -->
+
+        @if($schools->count())
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                @foreach ($schools as $school)
+                    <article class="group flex min-h-64 flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-blue-300 hover:shadow-md dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-blue-500/70">
+                        <div class="flex items-start justify-between gap-4">
+                            <span class="inline-flex size-11 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-300">
+                                <i data-lucide="school" class="size-5"></i>
+                            </span>
+
+                            @if($school->status)
+                                <span class="rounded-md bg-green-50 px-2 py-1 text-[10px] font-bold uppercase text-green-700 dark:bg-green-950/40 dark:text-green-300">Active</span>
+                            @else
+                                <span class="rounded-md bg-gray-100 px-2 py-1 text-[10px] font-bold uppercase text-gray-600 dark:bg-neutral-800 dark:text-neutral-300">Disabled</span>
+                            @endif
+                        </div>
+
+                        <div class="mt-4 min-w-0">
+                            <a href="{{ route('schools.students', $school->school_id) }}" class="block text-lg font-semibold leading-6 text-gray-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-300">
+                                {{ $school->name }}
+                            </a>
+                            <p class="mt-1 font-mono text-sm font-semibold text-blue-600 dark:text-blue-400">{{ $school->school_id }}</p>
+                        </div>
+
+                        <dl class="mt-4 grid gap-3 text-sm">
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="map-pin" class="mt-0.5 size-4 shrink-0 text-gray-400"></i>
+                                <dd class="min-w-0 text-gray-600 dark:text-neutral-300">
+                                    {{ $school->lga_name ?: 'LGA unavailable' }}
+                                </dd>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="phone" class="mt-0.5 size-4 shrink-0 text-gray-400"></i>
+                                <dd class="min-w-0 text-gray-600 dark:text-neutral-300">
+                                    {{ $school->phone ?: 'No phone number' }}
+                                </dd>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="mail" class="mt-0.5 size-4 shrink-0 text-gray-400"></i>
+                                <dd class="min-w-0 truncate text-gray-600 dark:text-neutral-300">
+                                    {{ $school->email ?: 'No email address' }}
+                                </dd>
+                            </div>
+                        </dl>
+
+                        <div class="mt-auto pt-5">
+                            <a href="{{ route('schools.students', $school->school_id) }}" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-neutral-900">
+                                View classes
+                                <i data-lucide="arrow-right" class="size-4"></i>
+                            </a>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+
+            <div class="rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+                {{ $schools->links('vendor.pagination.custom-pg') }}
+            </div>
+        @else
+            <div class="rounded-xl border border-dashed border-gray-200 bg-white p-8 text-center shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+                <i data-lucide="school" class="mx-auto size-9 text-gray-400"></i>
+                <h2 class="mt-3 text-base font-semibold text-gray-900 dark:text-white">No schools found</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-neutral-400">Try adjusting the current filters.</p>
+            </div>
+        @endif
+        </div>
 </x-app-layout>

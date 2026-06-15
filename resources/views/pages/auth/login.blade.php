@@ -30,14 +30,14 @@
                         <div class="grid gap-y-4">
                             <!-- Form Group -->
                             <div>
-                                <label for="email" class="block text-sm mb-2 dark:text-white">Username</label>
+                                <label for="login" class="block text-sm mb-2 dark:text-white">Username or Email</label>
                                 <div class="relative">
-                                    <input type="text" id="username" name="username"
+                                    <input type="text" id="login" name="login" value="{{ old('login') }}"
                                         class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-red-500 focus:ring-red-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
-                                        aria-describedby="email-error">
+                                        aria-describedby="login-error">
                                 </div>
-                                @error('username')
-                                    <p class="text-xs text-red-600 mt-2" id="email-error">{{ $message }}</p>
+                                @error('login')
+                                    <p class="text-xs text-red-600 mt-2" id="login-error">{{ $message }}</p>
                                 @enderror
                             </div>
                             <!-- End Form Group -->

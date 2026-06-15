@@ -31,9 +31,9 @@
             <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200 text-rose-600">Student Discipline Records</h2>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
-                <thead class="bg-gray-50 dark:bg-neutral-800">
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
                     <tr>
                         <th class="px-6 py-3 text-start text-xs font-bold uppercase text-gray-500">S/N</th>
                         <th class="px-6 py-3 text-start text-xs font-bold uppercase text-gray-500">Student ID</th>
@@ -47,19 +47,19 @@
                 <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
                     @forelse($penalties as $index => $penalty)
                     <tr class="hover:bg-rose-50/30 dark:hover:bg-rose-900/10 transition-colors">
-                        <td class="px-6 py-4 text-sm text-gray-800 dark:text-neutral-200">{{ $penalties->firstItem() + $index }}</td>
-                        <td class="px-6 py-4 text-sm font-mono text-rose-600 font-bold">{{ $penalty->student_id }}</td>
-                        <td class="px-6 py-4 text-sm font-semibold text-gray-800 dark:text-neutral-200">{{ $penalty->fname }} {{ $penalty->sname }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-800 dark:text-neutral-200">
+                        <td>{{ $penalties->firstItem() + $index }}</td>
+                        <td class="font-mono font-semibold text-rose-600 dark:text-rose-400">{{ $penalty->student_id }}</td>
+                        <td class="record-title">{{ $penalty->fname }} {{ $penalty->sname }}</td>
+                        <td>
                             <span class="font-medium">{{ $penalty->offence }}</span>
                         </td>
-                        <td class="px-6 py-4 text-sm italic text-gray-500">{{ $penalty->punishment }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-500">{{ $penalty->school }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-400 font-bold uppercase">{{ $penalty->offence_date }}</td>
+                        <td class="record-muted italic">{{ $penalty->punishment }}</td>
+                        <td class="record-muted">{{ $penalty->school }}</td>
+                        <td class="record-muted font-semibold uppercase">{{ $penalty->offence_date }}</td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-10 text-center text-sm text-gray-500 dark:text-neutral-400">
+                        <td colspan="7" class="empty-row px-6 py-10">
                             No discipline records match the current filters.
                         </td>
                     </tr>

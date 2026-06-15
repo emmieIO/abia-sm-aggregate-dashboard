@@ -1,5 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap");
 @import "./login.css";
 @import "tailwindcss";
 
@@ -16,7 +15,7 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: "Inter", "Graphik", sans-serif;
+    --font-sans: "Figtree", "Graphik", sans-serif;
     --font-serif: "Merriweather", serif;
 }
 
@@ -62,4 +61,68 @@
 
 * {
     @apply font-sans;
+}
+
+@layer components {
+    .table-scroll {
+        @apply overflow-x-auto;
+    }
+
+    .data-table {
+        @apply min-w-full border-separate border-spacing-0 text-sm;
+    }
+
+    .data-table thead {
+        @apply bg-gray-50 dark:bg-neutral-800/80;
+    }
+
+    .data-table th {
+        @apply whitespace-nowrap border-b border-gray-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:border-neutral-700 dark:text-neutral-400;
+    }
+
+    .data-table td {
+        @apply max-w-72 border-b border-gray-100 px-4 py-3 align-middle text-sm text-gray-600 dark:border-neutral-800 dark:text-neutral-300;
+    }
+
+    .data-table tbody tr {
+        @apply transition-colors odd:bg-white even:bg-gray-50/50 hover:bg-blue-50/60 dark:odd:bg-neutral-900 dark:even:bg-neutral-800/25 dark:hover:bg-neutral-800/70;
+    }
+
+    .data-table tbody tr:last-child td {
+        @apply border-b-0;
+    }
+
+    .data-table td:first-child,
+    .data-table th:first-child {
+        @apply ps-6;
+    }
+
+    .data-table td:last-child,
+    .data-table th:last-child {
+        @apply pe-6;
+    }
+
+    .data-table.compact th {
+        @apply px-3 py-2.5;
+    }
+
+    .data-table.compact td {
+        @apply max-w-64 px-3 py-2.5;
+    }
+
+    .data-table .record-id {
+        @apply font-mono font-semibold text-blue-600 dark:text-blue-400;
+    }
+
+    .data-table .record-title {
+        @apply font-semibold text-gray-900 dark:text-white;
+    }
+
+    .data-table .record-muted {
+        @apply text-gray-500 dark:text-neutral-400;
+    }
+
+    .data-table .empty-row {
+        @apply bg-white text-center text-gray-500 hover:bg-white dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-900;
+    }
 }

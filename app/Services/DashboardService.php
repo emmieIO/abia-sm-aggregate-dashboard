@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
-    private const CACHE_TTL = 600;
+    private const CACHE_TTL = 3600;
 
     private const INTERVENTION_THRESHOLD = 50.0;
 
@@ -22,37 +22,45 @@ class DashboardService
     {
         $schoolId = $schoolId ?: null;
 
-        return Cache::remember("dashboard_context_v9:{$schoolId}", self::CACHE_TTL, function () use ($schoolId) {
+        return Cache::remember("dashboard_context_v10:{$schoolId}", self::CACHE_TTL, function () use ($schoolId) {
             $schools = $this->fetchSchools();
             $selectedSchool = $schoolId
                 ? $schools->firstWhere('school_id', $schoolId)
                 : null;
 
-            $studentCount = $this->getNumberofStudents($schoolId);
-            $staffCount = $this->getNumberofStaffs($schoolId);
-            $parentCount = $this->getNumberofParents($schoolId);
-            $parentLinkedCount = $this->getLinkedStudentParentCount($schoolId);
-            $dataQuality = $this->fetchDataQuality($schoolId);
-            $schoolAnalytics = $this->fetchSchoolAnalytics();
-            $examRecordCount = $this->getExamRecordCount($schoolId);
-            $examSummaryCount = $this->getExamSummaryCount($schoolId);
-            $subjects = $this->fetchSubjects($schoolId);
-            $interventionStudents = $this->fetchInterventionStudents($schoolId);
+            $studentSummary = $this->fetchStudentSummary($schoolId);
+            $dashboardCounts = $this->fetchDashboardCounts($schoolId);
+            $studentCount = (int) $studentSummary->student_count;
+            $staffCount = (int) $dashboardCounts->staff_count;
+            $parentCount = (int) $dashboardCounts->parent_count;
+            $parentLinkedCount = (int) $studentSummary->parent_complete;
+            $dataQuality = $this->buildDataQuality($studentSummary);
+            $schoolAnalytics = $this->fetchSchoolAnalytics($schools);
+            $examRecordCount = (int) $dashboardCounts->exam_record_count;
+            $examSummaryCount = (int) $dashboardCounts->exam_summary_count;
+            $subjects = $examRecordCount > 0 ? $this->fetchSubjects($schoolId) : collect();
+            $interventionCount = $this->fetchInterventionCount($schoolId, $examRecordCount, $examSummaryCount);
+            $interventionStudents = ($examRecordCount > 0 || $examSummaryCount > 0)
+                ? $this->fetchInterventionStudents($schoolId, $examRecordCount, $examSummaryCount)
+                : collect();
+            $firstSubjectId = $subjects->first()->id ?? null;
+            $alumniCount = (int) $studentSummary->alumni_count;
+            $penaltyCount = (int) $dashboardCounts->penalty_count;
 
             return new DashboardMetricsDTO(
                 selectedSchool: $selectedSchool,
                 schools: $schools,
-                schoolCount: $this->getNumberofSchools(),
+                schoolCount: (int) $dashboardCounts->school_count,
                 studentCount: $studentCount,
                 staffCount: $staffCount,
                 parentCount: $parentCount,
-                alumniCount: $this->getAlumniCount($schoolId),
-                classCount: $this->getNumberofClasses($schoolId),
-                subjectCount: $this->getNumberofSubjects(),
+                alumniCount: $alumniCount,
+                classCount: (int) $dashboardCounts->class_count,
+                subjectCount: (int) $dashboardCounts->subject_count,
                 examRecordCount: $examRecordCount,
                 examSummaryCount: $examSummaryCount,
-                penaltyCount: $this->getPenaltyCount($schoolId),
-                interventionCount: $this->getInterventionCount($schoolId),
+                penaltyCount: $penaltyCount,
+                interventionCount: $interventionCount,
                 interventionThreshold: self::INTERVENTION_THRESHOLD,
                 studentStaffRatio: $staffCount > 0 ? round($studentCount / $staffCount, 1) : 0,
                 parentCoverageRate: $studentCount > 0 ? round(($parentLinkedCount / $studentCount) * 100, 1) : 0,
@@ -63,19 +71,19 @@ class DashboardService
                 ageDistribution: $this->fetchStudentAgeDistribution($schoolId),
                 stageDistribution: $this->fetchStageDistribution($schoolId),
                 classDistribution: $this->fetchClassDistribution($schoolId),
-                schoolDistribution: $this->fetchSchoolDistribution(),
+                schoolDistribution: $this->buildSchoolDistribution($schoolAnalytics),
                 schoolAnalytics: $schoolAnalytics,
                 dataQuality: $dataQuality,
                 interventionStudents: $interventionStudents,
                 academicAvailability: $this->fetchAcademicAvailability($examRecordCount, $examSummaryCount, $subjects->count()),
-                topStudents: $this->fetchTopFiveTopPerformingStudents(null, $schoolId),
-                lowStudents: $this->fetchTopFiveLowPerformingStudents(null, $schoolId),
+                topStudents: $firstSubjectId ? $this->fetchTopFiveTopPerformingStudents($firstSubjectId, $schoolId) : collect(),
+                lowStudents: $firstSubjectId ? $this->fetchTopFiveLowPerformingStudents($firstSubjectId, $schoolId) : collect(),
                 subjects: $subjects,
-                lgaDistribution: $this->fetchLgaDistribution($schoolId),
-                alumniList: $this->fetchAlumni(null, $schoolId),
-                penaltyList: $this->fetchStudentPenalties($schoolId),
-                sessions: $this->fetchSessions(),
-                attendanceRate: $this->fetchAverageAttendance($schoolId),
+                lgaDistribution: $this->buildLgaDistribution($schools, $schoolId),
+                alumniList: $alumniCount > 0 ? $this->fetchAlumni(null, $schoolId) : collect(),
+                penaltyList: $penaltyCount > 0 ? $this->fetchStudentPenalties($schoolId) : collect(),
+                sessions: $alumniCount > 0 ? $this->fetchSessions() : collect(),
+                attendanceRate: (float) $dashboardCounts->attendance_rate,
                 topSchools: $schoolAnalytics->sortByDesc('active_students')->values()->take(10)
             );
         });
@@ -98,13 +106,9 @@ class DashboardService
             ->take(10);
     }
 
-    public function fetchSchoolAnalytics(): Collection
+    public function fetchSchoolAnalytics(?Collection $schools = null): Collection
     {
-        $schools = DB::connection('abia_sms')->table('schools as s')
-            ->leftJoin('lgas as l', 's.lga', '=', 'l.id')
-            ->select('s.school_id', 's.name as school', 'l.name as lga', 's.status')
-            ->orderBy('s.name')
-            ->get();
+        $schools ??= $this->fetchSchools();
 
         $students = DB::connection('abia_sms')->table('students')
             ->select(
@@ -147,7 +151,7 @@ class DashboardService
 
             return (object) [
                 'school_id' => $school->school_id,
-                'school' => $school->school,
+                'school' => $school->school ?? $school->name,
                 'lga' => $school->lga ?: 'Unassigned',
                 'status' => $school->status,
                 'total_students' => (int) ($student->total_students ?? 0),
@@ -291,13 +295,22 @@ class DashboardService
 
     public function getInterventionCount(?string $schoolId = null): int
     {
-        if ($this->getExamSummaryCount($schoolId) > 0) {
+        return $this->fetchInterventionCount(
+            $schoolId,
+            $this->getExamRecordCount($schoolId),
+            $this->getExamSummaryCount($schoolId)
+        );
+    }
+
+    private function fetchInterventionCount(?string $schoolId, int $examRecordCount, int $examSummaryCount): int
+    {
+        if ($examSummaryCount > 0) {
             return $this->schoolScoped(DB::connection('abia_sms')->table('exam_records_summary'), $schoolId)
                 ->whereRaw('CAST(NULLIF(average, "") AS DECIMAL(10,2)) < ?', [self::INTERVENTION_THRESHOLD])
                 ->count();
         }
 
-        if ($this->getExamRecordCount($schoolId) === 0) {
+        if ($examRecordCount === 0) {
             return 0;
         }
 
@@ -383,6 +396,113 @@ class DashboardService
             ->get();
     }
 
+    private function fetchDashboardCounts(?string $schoolId = null): object
+    {
+        $bindings = [];
+        $scope = function (string $column = 'school_id') use ($schoolId, &$bindings): string {
+            if (! $schoolId) {
+                return '';
+            }
+
+            $bindings[] = $schoolId;
+
+            return " WHERE {$column} = ?";
+        };
+
+        $sql = '
+            SELECT
+                (SELECT COUNT(*) FROM schools) as school_count,
+                (SELECT COUNT(*) FROM staffs'.$scope().') as staff_count,
+                (SELECT COUNT(*) FROM parents'.$scope().') as parent_count,
+                (SELECT COUNT(*) FROM classes'.$scope().') as class_count,
+                (SELECT COUNT(*) FROM subjects) as subject_count,
+                (SELECT COUNT(*) FROM penalties'.$scope().') as penalty_count,
+                (SELECT COUNT(*) FROM exam_records'.$scope().') as exam_record_count,
+                (SELECT COUNT(*) FROM exam_records_summary'.$scope().') as exam_summary_count,
+                (SELECT COALESCE(AVG(attendance), 0) FROM exam_records_summary'.$scope().') as attendance_rate
+        ';
+
+        return DB::connection('abia_sms')->selectOne($sql, $bindings);
+    }
+
+    private function fetchStudentSummary(?string $schoolId = null): object
+    {
+        $query = DB::connection('abia_sms')->table('students')
+            ->selectRaw('
+                SUM(current_stage_id != 5) as student_count,
+                SUM(current_stage_id = 5) as alumni_count,
+                SUM(current_stage_id != 5 AND sex IS NOT NULL AND sex != "") as gender_complete,
+                SUM(current_stage_id != 5 AND dob IS NOT NULL AND dob != "") as dob_complete,
+                SUM(current_stage_id != 5 AND parent_id IS NOT NULL AND parent_id != "" AND parent_id != "0") as parent_complete,
+                SUM(current_stage_id != 5 AND current_class_id IS NOT NULL AND current_class_id != 0) as class_complete
+            ');
+
+        if ($schoolId) {
+            $query->where('school_id', $schoolId);
+        }
+
+        $summary = $query->first();
+
+        return (object) [
+            'student_count' => (int) ($summary->student_count ?? 0),
+            'alumni_count' => (int) ($summary->alumni_count ?? 0),
+            'gender_complete' => (int) ($summary->gender_complete ?? 0),
+            'dob_complete' => (int) ($summary->dob_complete ?? 0),
+            'parent_complete' => (int) ($summary->parent_complete ?? 0),
+            'class_complete' => (int) ($summary->class_complete ?? 0),
+        ];
+    }
+
+    private function buildDataQuality(object $summary): Collection
+    {
+        $studentCount = (int) $summary->student_count;
+
+        if ($studentCount === 0) {
+            return collect();
+        }
+
+        $checks = [
+            'Gender captured' => (int) $summary->gender_complete,
+            'Date of birth captured' => (int) $summary->dob_complete,
+            'Parent linked' => (int) $summary->parent_complete,
+            'Class assigned' => (int) $summary->class_complete,
+        ];
+
+        return collect($checks)->map(function ($complete, $label) use ($studentCount) {
+            return (object) [
+                'label' => $label,
+                'complete' => $complete,
+                'missing' => $studentCount - $complete,
+                'complete_rate' => round(($complete / $studentCount) * 100, 1),
+            ];
+        })->values();
+    }
+
+    private function buildSchoolDistribution(Collection $schoolAnalytics): Collection
+    {
+        return $schoolAnalytics
+            ->map(fn ($school) => (object) [
+                'school_id' => $school->school_id,
+                'school' => $school->school,
+                'total' => $school->active_students,
+            ])
+            ->sortByDesc('total')
+            ->values();
+    }
+
+    private function buildLgaDistribution(Collection $schools, ?string $schoolId = null): Collection
+    {
+        return $schools
+            ->when($schoolId, fn ($items) => $items->where('school_id', $schoolId))
+            ->groupBy(fn ($school) => $school->lga ?: 'Unassigned')
+            ->map(fn ($group, $lga) => (object) [
+                'lga' => $lga,
+                'total' => $group->count(),
+            ])
+            ->sortByDesc('total')
+            ->values();
+    }
+
     public function fetchDataQuality(?string $schoolId = null): Collection
     {
         $summary = $this->schoolScoped(DB::connection('abia_sms')->table('students'), $schoolId)
@@ -432,9 +552,12 @@ class DashboardService
         ];
     }
 
-    public function fetchInterventionStudents(?string $schoolId = null): Collection
+    public function fetchInterventionStudents(?string $schoolId = null, ?int $examRecordCount = null, ?int $examSummaryCount = null): Collection
     {
-        if ($this->getExamSummaryCount($schoolId) > 0) {
+        $examRecordCount ??= $this->getExamRecordCount($schoolId);
+        $examSummaryCount ??= $this->getExamSummaryCount($schoolId);
+
+        if ($examSummaryCount > 0) {
             return $this->schoolScoped(DB::connection('abia_sms')->table('exam_records_summary as ers'), $schoolId, 'ers.school_id')
                 ->join('students as s', 's.student_id', '=', 'ers.student_id')
                 ->leftJoin('schools as sch', 'sch.school_id', '=', 'ers.school_id')
@@ -455,7 +578,7 @@ class DashboardService
                 ->map(fn ($student) => $this->formatInterventionStudent($student, 'Overall average'));
         }
 
-        if ($this->getExamRecordCount($schoolId) === 0) {
+        if ($examRecordCount === 0) {
             return collect();
         }
 

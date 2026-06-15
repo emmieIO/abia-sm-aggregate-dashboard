@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authentication;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Authentication\UpdatePasswordRequest;
 use App\Services\Authentication\AuthenticationService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -21,21 +22,21 @@ class AuthenticationController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'username' => 'required|string',
+            'login' => 'required|string',
             'password' => 'required|string',
         ]);
 
         if (
             $this->authenticationService->authenticateUser(
-                $request->username,
+                $request->login,
                 $request->password
             )
         ) {
             return redirect()->route('dashboard.index');
         }
         return redirect()->back()
-            ->withInput($request->only('username'))
-            ->withErrors(['username' => 'The provided credentials are incorrect. Please try again.']);
+            ->withInput($request->only('login'))
+            ->withErrors(['login' => 'The provided credentials are incorrect. Please try again.']);
 
     }
 
@@ -44,5 +45,20 @@ class AuthenticationController extends Controller
         $this->authenticationService->logoutUser();
 
         return redirect()->route('login.show');
+    }
+
+    public function editPassword()
+    {
+        return view('pages.auth.change-password');
+    }
+
+    public function updatePassword(UpdatePasswordRequest $request)
+    {
+        $this->authenticationService->updatePassword(
+            $request->user(),
+            $request->password
+        );
+
+        return back()->with('status', 'password-updated');
     }
 }

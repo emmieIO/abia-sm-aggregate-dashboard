@@ -50,7 +50,7 @@
                 </div>
             </a>
 
-            <a href="{{ route('students.index', $activeSchoolId ? ['school_id' => $activeSchoolId] : []) }}" class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition hover:border-emerald-200 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900">
+            <a href="{{ $activeSchoolId ? route('schools.students', $activeSchoolId) : route('schools.index') }}" class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition hover:border-emerald-200 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <p class="text-sm font-medium text-gray-500 dark:text-neutral-400">Active Students</p>
@@ -65,8 +65,17 @@
             <a href="{{ route('staffs.index', $activeSchoolId ? ['school_id' => $activeSchoolId] : []) }}" class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition hover:border-violet-200 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900">
                 <div class="flex items-center justify-between gap-3">
                     <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-neutral-400">Student Staff Ratio</p>
-                        <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $student_staff_ratio }}:1</p>
+                        <p class="text-sm font-medium text-gray-500 dark:text-neutral-400">Student to Staff Ratio</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+                            {{ $staff_count > 0 ? number_format($student_staff_ratio, 1).' : 1' : 'N/A' }}
+                        </p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-neutral-400">
+                            @if($staff_count > 0)
+                                {{ number_format($student_count) }} students / {{ number_format($staff_count) }} staff
+                            @else
+                                No staff recorded for this view
+                            @endif
+                        </p>
                     </div>
                     <span class="rounded-lg bg-violet-50 p-3 text-violet-600 dark:bg-violet-950/40 dark:text-violet-300">
                         <i data-lucide="briefcase-business" class="size-5"></i>
@@ -180,8 +189,8 @@
             </div>
 
             @if($intervention_students->isNotEmpty())
-                <div class="mt-5 overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-neutral-800">
+                <div class="mt-5 table-scroll">
+                    <table class="data-table compact">
                         <thead>
                             <tr class="text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-neutral-500">
                                 <th class="py-3 pr-4">Student</th>
@@ -194,7 +203,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-neutral-800">
                             @foreach($intervention_students as $student)
-                                <tr class="text-gray-700 dark:text-neutral-200">
+                                <tr>
                                     <td class="py-3 pr-4">
                                         <p class="font-semibold text-gray-900 dark:text-white">{{ $student->name }}</p>
                                         <p class="text-xs text-gray-500 dark:text-neutral-500">{{ $student->student_id }}</p>
@@ -238,28 +247,35 @@
                     @endif
                 </div>
 
-                <div class="mt-5 overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-neutral-800">
+                <div class="mt-5 table-scroll">
+                    <table class="data-table compact">
                         <thead>
                             <tr class="text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-neutral-500">
                                 <th class="py-3 pr-4">School</th>
                                 <th class="px-4 py-3 text-right">Students</th>
                                 <th class="px-4 py-3 text-right">Staff</th>
-                                <th class="px-4 py-3 text-right">Ratio</th>
+                                <th class="px-4 py-3 text-right">Students per 1 Staff</th>
                                 <th class="px-4 py-3 text-right">Parents</th>
                                 <th class="px-4 py-3 text-right">Coverage</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-neutral-800">
                             @foreach($school_analytics as $school)
-                                <tr class="text-gray-700 dark:text-neutral-200">
+                                <tr>
                                     <td class="py-3 pr-4">
                                         <a href="{{ route('dashboard.index', ['school_id' => $school->school_id]) }}" class="font-semibold text-gray-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400">{{ $school->school }}</a>
                                         <p class="text-xs text-gray-500 dark:text-neutral-500">{{ $school->lga }}</p>
                                     </td>
                                     <td class="px-4 py-3 text-right">{{ number_format($school->active_students) }}</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($school->staff_count) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ $school->student_staff_ratio }}:1</td>
+                                    <td class="px-4 py-3 text-right">
+                                        @if($school->staff_count > 0)
+                                            <span class="font-semibold text-gray-900 dark:text-white">{{ number_format($school->student_staff_ratio, 1) }} : 1</span>
+                                            <p class="text-xs text-gray-500 dark:text-neutral-500">{{ number_format($school->active_students) }} / {{ number_format($school->staff_count) }}</p>
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-3 text-right">{{ number_format($school->parent_count) }}</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($school->parent_coverage_rate, 1) }}%</td>
                                 </tr>

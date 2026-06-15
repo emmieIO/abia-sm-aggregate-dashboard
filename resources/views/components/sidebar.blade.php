@@ -5,7 +5,6 @@
                 <ul class="flex flex-col space-y-1">
                     <x-sidebar-link name="Dashboard" route="dashboard.index" icon="layout-dashboard" />
                     <x-sidebar-link name="Schools" route="schools.index" icon="school" />
-                    <x-sidebar-link name="Students" route="students.index" icon="users" />
                     <x-sidebar-link name="Alumni" route="alumni.index" icon="graduation-cap" />
                     <x-sidebar-link name="Staffs" route="staffs.index" icon="briefcase" />
                     <x-sidebar-link name="Parents" route="parents.index" icon="user-plus" />

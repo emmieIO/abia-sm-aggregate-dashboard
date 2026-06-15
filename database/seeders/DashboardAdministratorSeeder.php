@@ -14,12 +14,14 @@ class DashboardAdministratorSeeder extends Seeder
      */
     public function run(): void
     {
-        User::updateOrCreate(['email' => 'default@mail.com'],[
-            'name' => 'Admin User',
-            'username' => 'admin-'.str()->random(5),
-            'email' => 'default@mail.com',
-            'password' => 'maxsecret123@',
-            'role' => UserRole::ADMINISTRATOR->value,
-        ]);
+        User::updateOrCreate(
+            ['username' => 'admin'],
+            [
+                'name' => 'Dashboard Administrator',
+                'email' => 'analytics@abiasmartschools.com',
+                'password' => 'Password123!',
+                'role' => UserRole::ADMINISTRATOR,
+            ]
+        );
     }
 }

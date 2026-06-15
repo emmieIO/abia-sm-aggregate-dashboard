@@ -132,18 +132,14 @@ Use Supervisor, systemd, or your hosting control panel to keep the worker runnin
 
 ## Updating an Existing Deployment
 
-Run these commands from the project directory after pulling new code:
+Run the deployment script from the project directory after pulling new code:
 
 ```bash
-composer install --no-dev --optimize-autoloader
-npm ci
-npm run build
-php artisan migrate --force
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-php artisan cache:clear
+./deploy.sh
 ```
+
+Set `RUN_GIT_PULL=1 ./deploy.sh` if the server should pull the latest code before deploying.
+Set `RUN_MIGRATIONS=0 ./deploy.sh` if migrations should be skipped for a specific deploy.
 
 Restart PHP-FPM and queue workers if your hosting environment requires it.
 
@@ -171,7 +167,7 @@ After deployment, confirm:
 
 - Login page loads.
 - A dashboard user can sign in.
-- `/schools`, `/students`, `/parents`, `/alumni`, and `/penalties` pages load.
+- `/schools`, `/parents`, `/alumni`, and `/penalties` pages load.
 - The dashboard can read the `abia_sms` database.
 - `public/build/manifest.json` exists after `npm run build`.
 - `storage/logs/laravel.log` has no fresh deployment errors.
