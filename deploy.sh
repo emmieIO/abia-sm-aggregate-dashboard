@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
+# 1. Pull latest code
+git pull origin main
 
+# 2. Allow Composer to run as root
+export COMPOSER_ALLOW_SUPERUSER=1
 # Ensure app goes back up if anything fails
 trap "php artisan up" EXIT
 
